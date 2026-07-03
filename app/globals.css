@@ -1417,3 +1417,174 @@ body {
   font-size: 10px;
   color: var(--text-dim);
 }
+
+/* ── FLOATING NOTIFICATION WIDGET ── */
+.floating-notif-wrap {
+  position: fixed;
+  right: 28px;
+  bottom: 36px;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.floating-notif-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1a1400, #3a2800, #C9A84C);
+  border: 2px solid rgba(201,168,76,0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow:
+    0 8px 32px rgba(201,168,76,0.35),
+    0 2px 8px rgba(0,0,0,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  color: #fff;
+  transition: all 0.3s ease;
+  animation: floatBell 3s ease-in-out infinite;
+}
+.floating-notif-btn:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 12px 40px rgba(201,168,76,0.5), 0 4px 16px rgba(0,0,0,0.6);
+  border-color: var(--gold);
+}
+
+@keyframes floatBell {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Pulsing ring behind button */
+.floating-notif-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(201,168,76,0.3);
+  animation: ringPulse 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes ringPulse {
+  0%,100% { opacity:0.3; transform:scale(1); }
+  50% { opacity:0.8; transform:scale(1.08); }
+}
+
+.floating-notif-icon {
+  position: relative;
+  z-index: 1;
+  animation: bellShake 4s ease-in-out infinite;
+}
+@keyframes bellShake {
+  0%,85%,100% { transform: rotate(0deg); }
+  87% { transform: rotate(12deg); }
+  89% { transform: rotate(-10deg); }
+  91% { transform: rotate(8deg); }
+  93% { transform: rotate(-6deg); }
+  95% { transform: rotate(4deg); }
+  97% { transform: rotate(0deg); }
+}
+
+.floating-notif-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #E74C3C;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  border: 2px solid var(--dark);
+  padding: 0 4px;
+  animation: countPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 2px 8px rgba(231,76,60,0.5);
+}
+@keyframes countPop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+/* Panel positioned above button */
+.floating-notif-panel {
+  width: 380px;
+  background: var(--dark-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(201,168,76,0.08),
+    0 -2px 0 rgba(201,168,76,0.2) inset;
+  overflow: hidden;
+  animation: panelUp 0.25s cubic-bezier(0.34,1.3,0.64,1);
+}
+@keyframes panelUp {
+  from { opacity:0; transform:translateY(20px) scale(0.95); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.notif-badge-inline {
+  background: rgba(231,76,60,0.15);
+  border: 1px solid rgba(231,76,60,0.3);
+  color: #E74C3C;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ── @MENTION DROPDOWN ── */
+.mention-dropdown {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--dark-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(201,168,76,0.1);
+  z-index: 500;
+  overflow: hidden;
+  animation: mentionSlide 0.15s ease;
+}
+@keyframes mentionSlide {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+.mention-dropdown-header {
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mention-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.mention-option:last-child { border-bottom: none; }
+.mention-option:hover {
+  background: var(--dark-3);
+}
+.mention-option:hover span {
+  color: var(--gold-light) !important;
+}
