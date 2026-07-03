@@ -564,68 +564,6 @@ export default function CRM() {
           <button className="topbar-btn" onClick={() => setShowImport(true)}>📥 Import</button>
           <button className="topbar-btn primary" onClick={() => { setEditing(false); setShowNewLead(true); }}>+ New Lead</button>
 
-          {/* NOTIFICATION BELL */}
-          <div style={{ position: 'relative' }}>
-            <button
-              className="notif-bell"
-              onClick={() => {
-                setShowNotifPanel(p => !p);
-                // Mark all as seen
-                const ids = notifications.map(n => n.id);
-                setSeenNotifs(ids);
-                try { localStorage.setItem('seqs_seen_notifs', JSON.stringify(ids)); } catch {}
-              }}
-            >
-              🔔
-              {notifications.filter(n => !seenNotifs.includes(n.id)).length > 0 && (
-                <span className="notif-badge">
-                  {notifications.filter(n => !seenNotifs.includes(n.id)).length}
-                </span>
-              )}
-            </button>
-
-            {/* NOTIFICATION PANEL */}
-            {showNotifPanel && (
-              <div className="notif-panel">
-                <div className="notif-panel-header">
-                  <span>🔔 Mentions & Tags</span>
-                  <button onClick={() => setShowNotifPanel(false)} style={{ background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer', fontSize:18, lineHeight:1 }}>×</button>
-                </div>
-                {notifications.length === 0 ? (
-                  <div className="notif-empty">
-                    <div style={{ fontSize: 36, marginBottom: 8 }}>🔔</div>
-                    <div>No mentions yet</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>When someone tags you with @{session.userId}, it appears here</div>
-                  </div>
-                ) : (
-                  <div className="notif-list">
-                    {notifications.map(n => (
-                      <div
-                        key={n.id}
-                        className={`notif-item${!seenNotifs.includes(n.id) ? ' notif-unread' : ''}`}
-                        onClick={() => { setOpenLead(n.lead); setShowNotifPanel(false); }}
-                      >
-                        <div className="notif-avatar-wrap">
-                          <div className={`user-avatar ${getUserById(n.by).badge}`} style={{ width:36, height:36, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, flexShrink:0 }}>
-                            {getUserById(n.by).initials}
-                          </div>
-                          {!seenNotifs.includes(n.id) && <div className="notif-unread-dot" />}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <div className="notif-text">
-                            <strong>{getUserById(n.by).name}</strong> tagged you in <strong>{n.leadName}</strong>
-                          </div>
-                          <div className="notif-note">"{n.note.length > 60 ? n.note.slice(0,60)+'…' : n.note}"</div>
-                          <div className="notif-time">{timeAgo(n.at)}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
           <div className="user-badge" onClick={logout} title="Click to sign out">
             <div className={`user-avatar ${currentUser.badge}`}>{currentUser.initials}</div>
             <div className="user-info">
@@ -851,6 +789,95 @@ export default function CRM() {
           <div key={t.id} className={`toast toast-${t.type}`}>{t.msg}</div>
         ))}
       </div>
+
+      {/* FLOATING NOTIFICATION WIDGET */}
+      <FloatingNotif
+        notifications={notifications}
+        seenNotifs={seenNotifs}
+        setSeenNotifs={setSeenNotifs}
+        showNotifPanel={showNotifPanel}
+        setShowNotifPanel={setShowNotifPanel}
+        setOpenLead={setOpenLead}
+        session={session}
+      />
+    </div>
+  );
+}
+
+// ── FLOATING NOTIFICATION WIDGET ────────────────────────────────────────────
+function FloatingNotif({ notifications, seenNotifs, setSeenNotifs, showNotifPanel, setShowNotifPanel, setOpenLead, session }) {
+  const unreadCount = notifications.filter(n => !seenNotifs.includes(n.id)).length;
+
+  function openPanel() {
+    setShowNotifPanel(p => !p);
+    const ids = notifications.map(n => n.id);
+    setSeenNotifs(ids);
+    try { localStorage.setItem('seqs_seen_notifs', JSON.stringify(ids)); } catch {}
+  }
+
+  return (
+    <div className="floating-notif-wrap">
+      {/* Panel */}
+      {showNotifPanel && (
+        <div className="floating-notif-panel">
+          <div className="notif-panel-header">
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <span style={{ fontSize:20 }}>🔔</span>
+              <span>Mentions & Tags</span>
+              {unreadCount > 0 && <span className="notif-badge-inline">{unreadCount} new</span>}
+            </div>
+            <button onClick={() => setShowNotifPanel(false)} style={{ background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer', fontSize:20, lineHeight:1 }}>×</button>
+          </div>
+          {notifications.length === 0 ? (
+            <div className="notif-empty">
+              <div style={{ fontSize:48, marginBottom:12 }}>🔔</div>
+              <div style={{ fontWeight:600, marginBottom:6 }}>No mentions yet</div>
+              <div style={{ fontSize:12, color:'var(--text-dim)' }}>
+                When someone tags you with <span style={{ color:'var(--gold)' }}>@{session?.userId}</span> in a comment, it appears here
+              </div>
+            </div>
+          ) : (
+            <div className="notif-list">
+              {notifications.map(n => (
+                <div
+                  key={n.id}
+                  className={`notif-item${!seenNotifs.includes(n.id) ? ' notif-unread' : ''}`}
+                  onClick={() => { setOpenLead(n.lead); setShowNotifPanel(false); }}
+                >
+                  <div className="notif-avatar-wrap">
+                    <div className={`user-avatar ${getUserById(n.by).badge}`}
+                      style={{ width:40, height:40, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:14, fontWeight:700, flexShrink:0 }}>
+                      {getUserById(n.by).initials}
+                    </div>
+                    {!seenNotifs.includes(n.id) && <div className="notif-unread-dot" />}
+                  </div>
+                  <div style={{ flex:1 }}>
+                    <div className="notif-text">
+                      <strong>{getUserById(n.by).name}</strong> tagged you in <strong style={{ color:'var(--gold)' }}>{n.leadName}</strong>
+                    </div>
+                    <div className="notif-note">"{n.note.length > 70 ? n.note.slice(0,70)+'…' : n.note}"</div>
+                    <div className="notif-time">{timeAgo(n.at)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Big fancy bell button */}
+      <button className="floating-notif-btn" onClick={openPanel}>
+        <div className="floating-notif-ring" />
+        <div className="floating-notif-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </div>
+        {unreadCount > 0 && (
+          <div className="floating-notif-count">{unreadCount}</div>
+        )}
+      </button>
     </div>
   );
 }
@@ -880,14 +907,51 @@ function LeadCard({ lead, onClick }) {
 
 // ── DETAIL MODAL ─────────────────────────────────────────────────────────────
 function DetailModal({ lead, session, onClose, onSave, onDelete, onStageChange, onActivity, onDeleteActivity, onUpload, onDeleteFile }) {
-  const [actType, setActType]   = useState('call');
-  const [actNote, setActNote]   = useState('');
+  const [actType, setActType]     = useState('call');
+  const [actNote, setActNote]     = useState('');
   const [uploading, setUploading] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [form, setForm]         = useState({ ...lead });
-  const fileRef = useRef(null);
+  const [editMode, setEditMode]   = useState(false);
+  const [form, setForm]           = useState({ ...lead });
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionPos, setMentionPos]     = useState(null); // index of @ in text
+  const [showMentions, setShowMentions] = useState(false);
+  const fileRef    = useRef(null);
+  const textareaRef = useRef(null);
 
   useEffect(() => { setForm({ ...lead }); }, [lead]);
+
+  // @mention detection
+  function handleNoteChange(e) {
+    const val = e.target.value;
+    setActNote(val);
+    const cursor = e.target.selectionStart;
+    const textBefore = val.slice(0, cursor);
+    const match = textBefore.match(/@(\w*)$/);
+    if (match) {
+      setMentionQuery(match[1].toLowerCase());
+      setMentionPos(match.index);
+      setShowMentions(true);
+    } else {
+      setShowMentions(false);
+    }
+  }
+
+  function insertMention(userId) {
+    const cursor = textareaRef.current?.selectionStart || actNote.length;
+    const textBefore = actNote.slice(0, cursor);
+    const atIdx = textBefore.lastIndexOf('@');
+    const before = actNote.slice(0, atIdx);
+    const after  = actNote.slice(cursor);
+    const newVal = before + '@' + userId + ' ' + after;
+    setActNote(newVal);
+    setShowMentions(false);
+    textareaRef.current?.focus();
+  }
+
+  const filteredMentions = USERS.filter(u =>
+    u.id !== session.userId &&
+    (u.id.toLowerCase().includes(mentionQuery) || u.name.toLowerCase().includes(mentionQuery))
+  );
 
   async function handleUpload(e) {
     const files = Array.from(e.target.files);
@@ -1010,18 +1074,43 @@ function DetailModal({ lead, session, onClose, onSave, onDelete, onStageChange, 
           {/* ACTIVITY LOG */}
           <div className="activity-section">
             <div className="activity-section-title">📋 Activity Timeline</div>
-            <div className="log-form">
+            <div className="log-form" style={{ position:'relative' }}>
               <select className="log-type-select" value={actType} onChange={e => setActType(e.target.value)}>
                 {ACTIVITY_TYPES.map(a => <option key={a.id} value={a.id}>{a.label}</option>)}
               </select>
-              <textarea
-                className="log-textarea"
-                placeholder="Add a note, call summary, or update…"
-                value={actNote}
-                onChange={e => setActNote(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && e.ctrlKey && (onActivity(lead, actType, actNote), setActNote(''))}
-              />
-              <button className="log-submit" onClick={() => { onActivity(lead, actType, actNote); setActNote(''); }}>Log</button>
+              <div style={{ flex:1, position:'relative' }}>
+                <textarea
+                  ref={textareaRef}
+                  className="log-textarea"
+                  style={{ width:'100%' }}
+                  placeholder="Add a note… type @ to mention someone"
+                  value={actNote}
+                  onChange={handleNoteChange}
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') setShowMentions(false);
+                    if (e.key === 'Enter' && e.ctrlKey) { onActivity(lead, actType, actNote); setActNote(''); setShowMentions(false); }
+                  }}
+                />
+                {/* @mention dropdown */}
+                {showMentions && filteredMentions.length > 0 && (
+                  <div className="mention-dropdown">
+                    <div className="mention-dropdown-header">Tag a team member</div>
+                    {filteredMentions.map(u => (
+                      <div key={u.id} className="mention-option" onClick={() => insertMention(u.id)}>
+                        <div className={`user-avatar ${u.badge}`} style={{ width:28, height:28, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, flexShrink:0 }}>
+                          {u.initials}
+                        </div>
+                        <div>
+                          <div style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>{u.name}</div>
+                          <div style={{ fontSize:11, color:'var(--text-dim)' }}>{u.role}</div>
+                        </div>
+                        <span style={{ marginLeft:'auto', fontSize:11, color:'var(--gold)' }}>@{u.id}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button className="log-submit" onClick={() => { onActivity(lead, actType, actNote); setActNote(''); setShowMentions(false); }}>Log</button>
             </div>
             <div className="timeline">
               {[...(lead.activities || [])].reverse().map(a => {
