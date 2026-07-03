@@ -337,109 +337,160 @@ export default function CRM() {
   if (!session) {
     return (
       <div className="login-screen">
-        {/* Corner accents */}
-        <div className="corner-tl"/><div className="corner-tr"/>
-        <div className="corner-bl"/><div className="corner-br"/>
 
-        {/* Orbiting dots */}
-        <div className="orbit-wrap">
-          <div className="orbit-dot orbit-dot-a"/>
-          <div className="orbit-dot orbit-dot-b"/>
-          <div className="orbit-dot orbit-dot-c"/>
+        {/* ── LEFT PANEL ── */}
+        <div className="login-left">
+          {/* Background image — Dubai/construction aerial */}
+          <div className="login-bg-img" />
+          <div className="login-bg-overlay" />
+
+          {/* Animated grid overlay */}
+          <div className="login-grid-overlay" />
+
+          {/* Top nav bar */}
+          <div className="login-topnav">
+            <div className="login-topnav-logo">
+              <img src="/logo.png" alt="Saif Elite QS" style={{ height: 36, objectFit: 'contain', filter: 'drop-shadow(0 2px 8px rgba(201,168,76,0.4))' }} />
+              <div>
+                <div style={{ fontFamily: 'Playfair Display, serif', fontSize: 14, fontWeight: 700, color: '#C9A84C', letterSpacing: 0.5 }}>Saif Elite QS</div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, textTransform: 'uppercase' }}>Quantity Surveyor</div>
+              </div>
+            </div>
+            <a href="https://saifeliteqs.com" target="_blank" rel="noopener noreferrer" className="login-topnav-link">
+              Visit Website →
+            </a>
+          </div>
+
+          {/* Hero text */}
+          <div className="login-hero">
+            <div className="login-hero-eyebrow">
+              <span className="login-hero-dot" />
+              Client Management System
+            </div>
+            <h1 className="login-hero-title">
+              Precision in <br />
+              <span className="login-hero-gold">Every Estimate.</span>
+            </h1>
+            <p className="login-hero-desc">
+              Manage your QS leads, track project proposals, monitor cost consulting pipeline — all in one secure platform built for Saif Elite QS.
+            </p>
+
+            {/* Stats row */}
+            <div className="login-stats-row">
+              <div className="login-stat-item">
+                <div className="login-stat-num">100%</div>
+                <div className="login-stat-lbl">Secure & Private</div>
+              </div>
+              <div className="login-stat-divider" />
+              <div className="login-stat-item">
+                <div className="login-stat-num">Live</div>
+                <div className="login-stat-lbl">Real-time Sync</div>
+              </div>
+              <div className="login-stat-divider" />
+              <div className="login-stat-item">
+                <div className="login-stat-num">3</div>
+                <div className="login-stat-lbl">Team Members</div>
+              </div>
+            </div>
+
+            {/* Feature tags */}
+            <div className="login-tags">
+              {['📐 Quantity Surveying','💰 Cost Consulting','📋 Proposals','📊 Pipeline Tracking','📎 File Uploads'].map(t => (
+                <span key={t} className="login-tag">{t}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom footer */}
+          <div className="login-left-footer">
+            <span>© {new Date().getFullYear()} Saif Elite QS</span>
+            <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+            <span>Quantity Surveyor & Cost Consultant</span>
+            <span style={{ color: 'rgba(255,255,255,0.2)' }}>·</span>
+            <span>Dubai, UAE</span>
+          </div>
         </div>
 
-        {/* Floating 3D shapes */}
-        <div className="shape shape-cube s1"/>
-        <div className="shape shape-diamond s2"/>
-        <div className="shape shape-ring s3"/>
-        <div className="shape shape-cube-sm s4"/>
-        <div className="shape shape-tri s5"/>
-        <div className="shape shape-diamond-teal s6"/>
-        <div className="shape shape-line s7"/>
-        <div className="shape shape-cube-lg s8"/>
-        <div className="shape shape-ring-teal s9"/>
-        <div className="shape shape-diamond s10"/>
-        <div className="shape shape-cube-sm s11"/>
-        <div className="shape shape-line-v s12"/>
-        <div className="shape shape-tri s13"/>
-        <div className="shape shape-ring s14"/>
-        <div className="shape shape-diamond-teal s15"/>
-        <div className="shape shape-cube s16"/>
+        {/* ── RIGHT PANEL — LOGIN CARD ── */}
+        <div className="login-right">
+          <div className="login-card">
+            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+              <img src="/logo.png" alt="Saif Elite QS" className="login-logo" />
+              <div className="login-company">Saif Elite QS</div>
+              <div className="login-subtitle">Quantity Surveyor & Cost Consultant</div>
+              <div className="login-divider" />
+            </div>
 
-        <div className="login-card">
-          <img src="/logo.png" alt="Saif Elite QS" className="login-logo" />
-          <div className="login-company">Saif Elite QS</div>
-          <div className="login-subtitle">Quantity Surveyor & Cost Consultant</div>
-          <div className="login-divider" />
-
-          {loginStep === 1 && (
-            <>
-              <div className="login-label">Select Your Account</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-                {USERS.map(u => (
-                  <button
-                    key={u.id}
-                    onClick={() => { setSelUser(u.id); setLoginStep(2); setLoginError(''); }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '12px 16px',
-                      background: 'var(--dark-3)',
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 10,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                      fontFamily: 'Inter, sans-serif',
-                      color: 'var(--text)',
-                      textAlign: 'left',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.background = 'var(--dark-4)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.background = 'var(--dark-3)'; }}
-                  >
-                    <div className={`user-avatar ${u.badge}`}>{u.initials}</div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{u.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{u.role}</div>
-                    </div>
-                    <span style={{ marginLeft: 'auto', color: 'var(--text-dim)', fontSize: 16 }}>›</span>
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-
-          {loginStep === 2 && (
-            <>
-              <button onClick={() => { setLoginStep(1); setLoginError(''); setPwInput(''); }}
-                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'Inter, sans-serif' }}>
-                ← Back
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, padding: '10px 14px', background: 'var(--dark-3)', borderRadius: 8 }}>
-                <div className={`user-avatar ${getUserById(selUser).badge}`}>{getUserById(selUser).initials}</div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: 13 }}>{getUserById(selUser).name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{getUserById(selUser).role}</div>
+            {loginStep === 1 && (
+              <>
+                <div className="login-label">Select Your Account</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+                  {USERS.map(u => (
+                    <button
+                      key={u.id}
+                      onClick={() => { setSelUser(u.id); setLoginStep(2); setLoginError(''); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '12px 16px',
+                        background: 'var(--dark-3)',
+                        border: '1px solid var(--border-subtle)',
+                        borderRadius: 10,
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        fontFamily: 'Inter, sans-serif',
+                        color: 'var(--text)',
+                        textAlign: 'left',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.background = 'var(--dark-4)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.background = 'var(--dark-3)'; }}
+                    >
+                      <div className={`user-avatar ${u.badge}`}>{u.initials}</div>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{u.name}</div>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{u.role}</div>
+                      </div>
+                      <span style={{ marginLeft: 'auto', color: 'var(--text-dim)', fontSize: 16 }}>›</span>
+                    </button>
+                  ))}
                 </div>
-              </div>
-              {loginError && <div className="login-error">{loginError}</div>}
-              <div className="login-label">Password</div>
-              <input
-                type="password"
-                className="login-input"
-                value={pwInput}
-                onChange={e => setPwInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                placeholder="Enter your password"
-                autoFocus
-              />
-              <button className="login-btn" onClick={handleLogin}>Sign In →</button>
-            </>
-          )}
+              </>
+            )}
 
-          <div className="login-footer">Saif Elite QS — CRM v1.0</div>
+            {loginStep === 2 && (
+              <>
+                <button onClick={() => { setLoginStep(1); setLoginError(''); setPwInput(''); }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'Inter, sans-serif' }}>
+                  ← Back
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, padding: '10px 14px', background: 'var(--dark-3)', borderRadius: 8 }}>
+                  <div className={`user-avatar ${getUserById(selUser).badge}`}>{getUserById(selUser).initials}</div>
+                  <div>
+                    <div style={{ fontWeight: 600, fontSize: 13 }}>{getUserById(selUser).name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{getUserById(selUser).role}</div>
+                  </div>
+                </div>
+                {loginError && <div className="login-error">{loginError}</div>}
+                <div className="login-label">Password</div>
+                <input
+                  type="password"
+                  className="login-input"
+                  value={pwInput}
+                  onChange={e => setPwInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                  placeholder="Enter your password"
+                  autoFocus
+                />
+                <button className="login-btn" onClick={handleLogin}>Sign In →</button>
+              </>
+            )}
+
+            <div className="login-footer">Saif Elite QS — CRM v1.0</div>
+          </div>
         </div>
       </div>
     );
   }
+
 
   // ──────────────────────────────────────────────────────────────────────────
   //  RENDER: APP
