@@ -337,6 +337,35 @@ export default function CRM() {
   if (!session) {
     return (
       <div className="login-screen">
+        {/* Corner accents */}
+        <div className="corner-tl"/><div className="corner-tr"/>
+        <div className="corner-bl"/><div className="corner-br"/>
+
+        {/* Orbiting dots */}
+        <div className="orbit-wrap">
+          <div className="orbit-dot orbit-dot-a"/>
+          <div className="orbit-dot orbit-dot-b"/>
+          <div className="orbit-dot orbit-dot-c"/>
+        </div>
+
+        {/* Floating 3D shapes */}
+        <div className="shape shape-cube s1"/>
+        <div className="shape shape-diamond s2"/>
+        <div className="shape shape-ring s3"/>
+        <div className="shape shape-cube-sm s4"/>
+        <div className="shape shape-tri s5"/>
+        <div className="shape shape-diamond-teal s6"/>
+        <div className="shape shape-line s7"/>
+        <div className="shape shape-cube-lg s8"/>
+        <div className="shape shape-ring-teal s9"/>
+        <div className="shape shape-diamond s10"/>
+        <div className="shape shape-cube-sm s11"/>
+        <div className="shape shape-line-v s12"/>
+        <div className="shape shape-tri s13"/>
+        <div className="shape shape-ring s14"/>
+        <div className="shape shape-diamond-teal s15"/>
+        <div className="shape shape-cube s16"/>
+
         <div className="login-card">
           <img src="/logo.png" alt="Saif Elite QS" className="login-logo" />
           <div className="login-company">Saif Elite QS</div>
