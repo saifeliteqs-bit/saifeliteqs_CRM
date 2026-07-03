@@ -4,9 +4,9 @@ import * as XLSX from 'xlsx';
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const USERS = [
-  { id: 'saif',    name: 'Saif',   role: 'CEO',       badge: 'avatar-ceo',       initials: 'SA', access: 'all' },
-  { id: 'nouman',  name: 'Nouman', role: 'Marketing', badge: 'avatar-marketing', initials: 'NO', access: 'all' },
-  { id: 'zafar',   name: 'Zafar',  role: 'Operations',badge: 'avatar-ops',       initials: 'ZA', access: 'all' },
+  { id: 'saif',   name: 'Saif',   role: 'CEO',        badge: 'avatar-ceo',       initials: 'SA', access: 'all' },
+  { id: 'nouman', name: 'Nouman', role: 'Marketing',  badge: 'avatar-marketing', initials: 'NO', access: 'all' },
+  { id: 'zafar',  name: 'Zafar',  role: 'Operations', badge: 'avatar-ops',       initials: 'ZA', access: 'assigned' },
 ];
 
 const STAGES = [
@@ -94,6 +94,11 @@ export default function CRM() {
   const [editing, setEditing]        = useState(false);
   const [loading, setLoading]        = useState(false);
   const [toasts, setToasts]          = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [seenNotifs, setSeenNotifs]   = useState(() => {
+    try { return JSON.parse(localStorage.getItem('seqs_seen_notifs') || '[]'); } catch { return []; }
+  });
   const fileInputRef = useRef(null);
   const uploadRef    = useRef(null);
 
@@ -105,18 +110,48 @@ export default function CRM() {
     } catch {}
   }, []);
 
-  // ── Load leads ──
+  // ── Load leads + extract notifications ──
   const loadLeads = useCallback(async () => {
     if (!session) return;
     setLoading(true);
     try {
       const r = await fetch('/api/leads');
-      if (r.ok) setLeads(await r.json());
+      if (r.ok) {
+        const data = await r.json();
+        setLeads(data);
+        // Extract @mention notifications for current user
+        const myMentionKey = '@' + session.userId;
+        const notifs = [];
+        data.forEach(lead => {
+          (lead.activities || []).forEach(act => {
+            if (act.note && act.note.toLowerCase().includes(myMentionKey) && act.by !== session.userId) {
+              notifs.push({
+                id: act.id,
+                leadId: lead.id,
+                leadName: lead.name,
+                by: act.by,
+                note: act.note,
+                at: act.at,
+                lead,
+              });
+            }
+          });
+        });
+        notifs.sort((a,b) => new Date(b.at) - new Date(a.at));
+        setNotifications(notifs);
+      }
     } catch {}
     setLoading(false);
   }, [session]);
 
   useEffect(() => { loadLeads(); }, [loadLeads]);
+  
+  // Poll for new notifications every 30 seconds
+  useEffect(() => {
+    if (!session) return;
+    const interval = setInterval(loadLeads, 30000);
+    return () => clearInterval(interval);
+  }, [session, loadLeads]);
 
   // ── Toast ──
   function toast(msg, type = 'success') {
@@ -242,7 +277,12 @@ export default function CRM() {
 
   // ── Filters ──
   function filterLeads(arr) {
+    const currentUserObj = getUserById(session?.userId);
     return arr.filter(l => {
+      // Zafar: only sees leads assigned to him
+      if (currentUserObj?.access === 'assigned') {
+        if (l.assignedTo !== session.userId) return false;
+      }
       if (search) {
         const q = search.toLowerCase();
         if (!['name','company','phone','email','location','projectRef'].some(k => l[k]?.toLowerCase().includes(q))) return false;
@@ -523,6 +563,69 @@ export default function CRM() {
         <div className="topbar-actions">
           <button className="topbar-btn" onClick={() => setShowImport(true)}>📥 Import</button>
           <button className="topbar-btn primary" onClick={() => { setEditing(false); setShowNewLead(true); }}>+ New Lead</button>
+
+          {/* NOTIFICATION BELL */}
+          <div style={{ position: 'relative' }}>
+            <button
+              className="notif-bell"
+              onClick={() => {
+                setShowNotifPanel(p => !p);
+                // Mark all as seen
+                const ids = notifications.map(n => n.id);
+                setSeenNotifs(ids);
+                try { localStorage.setItem('seqs_seen_notifs', JSON.stringify(ids)); } catch {}
+              }}
+            >
+              🔔
+              {notifications.filter(n => !seenNotifs.includes(n.id)).length > 0 && (
+                <span className="notif-badge">
+                  {notifications.filter(n => !seenNotifs.includes(n.id)).length}
+                </span>
+              )}
+            </button>
+
+            {/* NOTIFICATION PANEL */}
+            {showNotifPanel && (
+              <div className="notif-panel">
+                <div className="notif-panel-header">
+                  <span>🔔 Mentions & Tags</span>
+                  <button onClick={() => setShowNotifPanel(false)} style={{ background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer', fontSize:18, lineHeight:1 }}>×</button>
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="notif-empty">
+                    <div style={{ fontSize: 36, marginBottom: 8 }}>🔔</div>
+                    <div>No mentions yet</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>When someone tags you with @{session.userId}, it appears here</div>
+                  </div>
+                ) : (
+                  <div className="notif-list">
+                    {notifications.map(n => (
+                      <div
+                        key={n.id}
+                        className={`notif-item${!seenNotifs.includes(n.id) ? ' notif-unread' : ''}`}
+                        onClick={() => { setOpenLead(n.lead); setShowNotifPanel(false); }}
+                      >
+                        <div className="notif-avatar-wrap">
+                          <div className={`user-avatar ${getUserById(n.by).badge}`} style={{ width:36, height:36, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, flexShrink:0 }}>
+                            {getUserById(n.by).initials}
+                          </div>
+                          {!seenNotifs.includes(n.id) && <div className="notif-unread-dot" />}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          <div className="notif-text">
+                            <strong>{getUserById(n.by).name}</strong> tagged you in <strong>{n.leadName}</strong>
+                          </div>
+                          <div className="notif-note">"{n.note.length > 60 ? n.note.slice(0,60)+'…' : n.note}"</div>
+                          <div className="notif-time">{timeAgo(n.at)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="user-badge" onClick={logout} title="Click to sign out">
             <div className={`user-avatar ${currentUser.badge}`}>{currentUser.initials}</div>
             <div className="user-info">
