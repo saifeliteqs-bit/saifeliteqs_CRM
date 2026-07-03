@@ -40,6 +40,18 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--dark-5); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold-dark); }
 
+/* ── ANIMATIONS ── */
+@keyframes floatUp        { 0%{transform:translateY(100vh) rotate(0deg);opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{transform:translateY(-120px) rotate(720deg);opacity:0} }
+@keyframes floatDrift     { 0%{transform:translateY(100vh) translateX(0) rotate(0deg);opacity:0} 10%{opacity:.7} 90%{opacity:.7} 100%{transform:translateY(-120px) translateX(80px) rotate(360deg);opacity:0} }
+@keyframes floatDriftLeft { 0%{transform:translateY(100vh) translateX(0) rotate(0deg);opacity:0} 10%{opacity:.6} 90%{opacity:.6} 100%{transform:translateY(-120px) translateX(-60px) rotate(-480deg);opacity:0} }
+@keyframes spinRing       { 0%{transform:rotateX(70deg) rotateZ(0deg)} 100%{transform:rotateX(70deg) rotateZ(360deg)} }
+@keyframes pulseGlow      { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:.7;transform:scale(1.15)} }
+@keyframes gridMove       { 0%{background-position:0 0} 100%{background-position:60px 60px} }
+@keyframes shimmer        { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+@keyframes orbitA         { 0%{transform:rotate(0deg) translateX(180px) rotate(0deg)} 100%{transform:rotate(360deg) translateX(180px) rotate(-360deg)} }
+@keyframes orbitB         { 0%{transform:rotate(120deg) translateX(220px) rotate(-120deg)} 100%{transform:rotate(480deg) translateX(220px) rotate(-480deg)} }
+@keyframes orbitC         { 0%{transform:rotate(240deg) translateX(160px) rotate(-240deg)} 100%{transform:rotate(600deg) translateX(160px) rotate(-600deg)} }
+
 /* ── LOGIN SCREEN ── */
 .login-screen {
   min-height: 100vh;
@@ -50,22 +62,173 @@ body {
   position: relative;
   overflow: hidden;
 }
+
+/* Animated grid background */
 .login-screen::before {
   content: '';
   position: absolute;
-  top: -200px; right: -200px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridMove 8s linear infinite;
   pointer-events: none;
 }
+
+/* Central glow */
 .login-screen::after {
   content: '';
   position: absolute;
-  bottom: -200px; left: -200px;
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(27,154,160,0.06) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle,
+    rgba(201,168,76,0.06) 0%,
+    rgba(27,154,160,0.04) 40%,
+    transparent 70%);
+  animation: pulseGlow 4s ease-in-out infinite;
   pointer-events: none;
 }
+
+/* Floating shapes — injected via JS canvas overlay */
+.login-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Orbiting dots around center */
+.orbit-wrap {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.orbit-dot {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin: -3px 0 0 -3px;
+}
+.orbit-dot-a {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold), 0 0 20px rgba(201,168,76,0.4);
+  animation: orbitA 12s linear infinite;
+}
+.orbit-dot-b {
+  background: var(--teal-light);
+  box-shadow: 0 0 8px var(--teal-light), 0 0 20px rgba(43,191,198,0.4);
+  animation: orbitB 18s linear infinite;
+}
+.orbit-dot-c {
+  background: var(--gold-light);
+  box-shadow: 0 0 6px var(--gold-light);
+  animation: orbitC 24s linear infinite;
+  width: 4px; height: 4px; margin: -2px 0 0 -2px;
+}
+
+/* Floating geometric shapes */
+.shape {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+/* Cubes */
+.shape-cube {
+  width: 20px; height: 20px;
+  border: 1.5px solid rgba(201,168,76,0.5);
+  box-shadow: 0 0 10px rgba(201,168,76,0.2), inset 0 0 10px rgba(201,168,76,0.05);
+}
+.shape-cube-sm {
+  width: 12px; height: 12px;
+  border: 1px solid rgba(27,154,160,0.5);
+  box-shadow: 0 0 8px rgba(27,154,160,0.2);
+}
+.shape-cube-lg {
+  width: 30px; height: 30px;
+  border: 1.5px solid rgba(201,168,76,0.3);
+}
+/* Diamonds */
+.shape-diamond {
+  width: 14px; height: 14px;
+  border: 1.5px solid rgba(201,168,76,0.6);
+  transform: rotate(45deg);
+  box-shadow: 0 0 12px rgba(201,168,76,0.25);
+}
+.shape-diamond-teal {
+  width: 10px; height: 10px;
+  border: 1px solid rgba(43,191,198,0.6);
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px rgba(43,191,198,0.3);
+}
+/* Rings */
+.shape-ring {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201,168,76,0.3);
+  box-shadow: 0 0 15px rgba(201,168,76,0.1);
+  perspective: 300px;
+  animation: spinRing 8s linear infinite !important;
+}
+.shape-ring-teal {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid rgba(43,191,198,0.4);
+  box-shadow: 0 0 12px rgba(43,191,198,0.15);
+  animation: spinRing 12s linear infinite reverse !important;
+}
+/* Triangles */
+.shape-tri {
+  width: 0; height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 14px solid rgba(201,168,76,0.3);
+  border-top: none;
+  box-shadow: none;
+}
+/* Lines */
+.shape-line {
+  width: 40px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent);
+}
+.shape-line-v {
+  width: 1px; height: 40px;
+  background: linear-gradient(180deg, transparent, rgba(43,191,198,0.5), transparent);
+}
+
+/* Assign unique positions + animation delays */
+.s1  { left:5%;  bottom:-50px; animation: floatUp 14s 0s    linear infinite; }
+.s2  { left:12%; bottom:-50px; animation: floatDrift 18s 2s  linear infinite; }
+.s3  { left:20%; bottom:-50px; animation: floatUp 12s 4s    linear infinite; }
+.s4  { left:28%; bottom:-50px; animation: floatDriftLeft 16s 1s linear infinite; }
+.s5  { left:35%; bottom:-50px; animation: floatUp 20s 6s    linear infinite; }
+.s6  { left:42%; bottom:-50px; animation: floatDrift 15s 3s  linear infinite; }
+.s7  { left:50%; bottom:-50px; animation: floatUp 17s 5s    linear infinite; }
+.s8  { left:58%; bottom:-50px; animation: floatDriftLeft 13s 0.5s linear infinite; }
+.s9  { left:65%; bottom:-50px; animation: floatUp 19s 7s    linear infinite; }
+.s10 { left:72%; bottom:-50px; animation: floatDrift 14s 2.5s linear infinite; }
+.s11 { left:80%; bottom:-50px; animation: floatUp 16s 4.5s  linear infinite; }
+.s12 { left:88%; bottom:-50px; animation: floatDriftLeft 21s 1.5s linear infinite; }
+.s13 { left:92%; bottom:-50px; animation: floatUp 11s 3.5s  linear infinite; }
+.s14 { left:8%;  bottom:-50px; animation: floatDrift 22s 6.5s linear infinite; }
+.s15 { left:55%; bottom:-50px; animation: floatDriftLeft 15s 8s  linear infinite; }
+.s16 { left:75%; bottom:-50px; animation: floatUp 18s 9s    linear infinite; }
+
+/* Corner accent lines */
+.corner-tl, .corner-tr, .corner-bl, .corner-br {
+  position: absolute;
+  width: 60px; height: 60px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+.corner-tl { top: 20px; left: 20px; border-top: 1px solid var(--gold); border-left: 1px solid var(--gold); }
+.corner-tr { top: 20px; right: 20px; border-top: 1px solid var(--gold); border-right: 1px solid var(--gold); }
+.corner-bl { bottom: 20px; left: 20px; border-bottom: 1px solid var(--teal); border-left: 1px solid var(--teal); }
+.corner-br { bottom: 20px; right: 20px; border-bottom: 1px solid var(--teal); border-right: 1px solid var(--teal); }
 .login-card {
   background: var(--dark-2);
   border: 1px solid var(--border);
