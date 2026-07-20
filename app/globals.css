@@ -1588,3 +1588,91 @@ body {
 .mention-option:hover span {
   color: var(--gold-light) !important;
 }
+
+/* ── LEAD ID BADGE ── */
+.lead-id-badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: 4px;
+  padding: 2px 6px;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+.modal-lead-id {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  background: rgba(201,168,76,0.12);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 5px;
+  padding: 2px 8px;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', sans-serif;
+  align-self: center;
+}
+
+/* ── COLORFUL STAT CARDS ── */
+.stat-card {
+  border-radius: 14px;
+  padding: 22px 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+  cursor: default;
+}
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -20px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: 0.15;
+}
+
+.stat-card-blue   { background: linear-gradient(135deg, #1a2a4a, #1e3a6e); border: 1px solid rgba(59,130,246,0.4); }
+.stat-card-gold   { background: linear-gradient(135deg, #2a1f00, #3d2e00); border: 1px solid rgba(201,168,76,0.5); }
+.stat-card-green  { background: linear-gradient(135deg, #0d2a1a, #0f3d22); border: 1px solid rgba(46,204,113,0.4); }
+.stat-card-teal   { background: linear-gradient(135deg, #0a2430, #0d3040); border: 1px solid rgba(27,154,160,0.5); }
+.stat-card-purple { background: linear-gradient(135deg, #1e1040, #2a1660); border: 1px solid rgba(139,92,246,0.4); }
+.stat-card-orange { background: linear-gradient(135deg, #2a1500, #3d1f00); border: 1px solid rgba(251,146,60,0.4); }
+
+.stat-card-blue::after   { background: #3B82F6; }
+.stat-card-gold::after   { background: #C9A84C; }
+.stat-card-green::after  { background: #2ECC71; }
+.stat-card-teal::after   { background: #1B9AA0; }
+.stat-card-purple::after { background: #8B5CF6; }
+.stat-card-orange::after { background: #FB923C; }
+
+.stat-card-icon { font-size: 28px; margin-bottom: 12px; }
+
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 6px;
+  font-family: 'Playfair Display', serif;
+}
+.stat-card-blue   .stat-card-value { color: #60A5FA; }
+.stat-card-gold   .stat-card-value { color: #E2C97E; }
+.stat-card-green  .stat-card-value { color: #4ADE80; }
+.stat-card-teal   .stat-card-value { color: #2DD4DA; }
+.stat-card-purple .stat-card-value { color: #A78BFA; }
+.stat-card-orange .stat-card-value { color: #FB923C; }
+
+.stat-card-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 3px;
+}
+.stat-card-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+}
