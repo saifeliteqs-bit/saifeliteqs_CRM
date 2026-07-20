@@ -9,6 +9,16 @@ const USERS = [
   { id: 'zafar',  name: 'Zafar',  role: 'Operations', badge: 'avatar-ops',       initials: 'ZA', access: 'assigned' },
 ];
 
+// ── FACEBOOK SEED LEADS ──────────────────────────────────────────────────────
+const FB_LEADS = [
+  { name:'alokk',           phone:'+971521530356', service:'Quantity Surveying', scope:'Villa project', source:'Facebook Ads', createdAt:'2026-07-18T10:05:00.000Z' },
+  { name:'azeem',           phone:'+971504532897', service:'Quantity Surveying', scope:'Building',      source:'Facebook Ads', createdAt:'2026-07-18T15:42:00.000Z' },
+  { name:'Mohan Sah',       phone:'+9779814556058',service:'Quantity Surveying', scope:'Name inquiry',  source:'Facebook Ads', createdAt:'2026-07-18T22:45:00.000Z' },
+  { name:'Hatem Abushaban', phone:'+971504823103', service:'Quantity Surveying', scope:'Construction',  source:'Facebook Ads', createdAt:'2026-07-19T08:51:00.000Z' },
+  { name:'Hamza Sarsan',    phone:'+971555878623', service:'Quantity Surveying', scope:'Construction',  source:'Facebook Ads', createdAt:'2026-07-19T15:57:00.000Z' },
+  { name:'Tom',             phone:'+971559027784', service:'Contract Admin',     scope:'AMC',           source:'Facebook Ads', createdAt:'2026-07-19T22:38:00.000Z' },
+];
+
 const STAGES = [
   { id: 'new',       label: 'New Inquiry',    col: 'col-new',       pill: 'pill-new',       icon: '🔵' },
   { id: 'contacted', label: 'Contacted',      col: 'col-contacted', pill: 'pill-contacted', icon: '📞' },
@@ -19,7 +29,7 @@ const STAGES = [
 ];
 
 const SERVICE_TYPES = ['Quantity Surveying', 'Cost Consulting', 'Project Management', 'Contract Admin', 'Tendering', 'Feasibility Study', 'Value Engineering', 'Other'];
-const SOURCES       = ['Direct Inquiry', 'Referral', 'Website', 'LinkedIn', 'WhatsApp', 'Email', 'Phone Call', 'Other'];
+const SOURCES       = ['Facebook Ads', 'Instagram Ads', 'Meta Ads', 'Direct Inquiry', 'Referral', 'Website', 'LinkedIn', 'WhatsApp', 'Email', 'Phone Call', 'Other'];
 const ACTIVITY_TYPES = [
   { id: 'call',     label: '📞 Call',      cls: 'icon-call'     },
   { id: 'note',     label: '📝 Note',      cls: 'icon-note'     },
@@ -189,12 +199,23 @@ export default function CRM() {
     setLeads([]);
   }
 
+  // ── Auto ID generator ──
+  function generateLeadId(existingLeads) {
+    const nums = existingLeads
+      .map(l => l.leadId)
+      .filter(Boolean)
+      .map(id => parseInt(id.replace('SEQS-', '')) || 0);
+    const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+    return 'SEQS-' + String(next).padStart(4, '0');
+  }
+
   // ── Leads CRUD ──
   async function saveLead(data) {
     const isNew = !data.id;
     const payload = {
       ...data,
       id: data.id || `lead_${Date.now()}`,
+      leadId: data.leadId || generateLeadId(leads),
       createdAt: data.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       createdBy: data.createdBy || session.userId,
@@ -220,6 +241,33 @@ export default function CRM() {
     setLeads(p => p.filter(l => l.id !== id));
     setOpenLead(null);
     toast('Lead deleted', 'error');
+  }
+
+  // ── Import Facebook leads ──
+  async function importFbLeads() {
+    if (!confirm('Import 6 Facebook leads? Duplicates (same phone) will be skipped.')) return;
+    const existing = leads.map(l => l.phone);
+    let count = 0;
+    const allLeads = [...leads];
+    for (const fb of FB_LEADS) {
+      if (existing.includes(fb.phone)) continue;
+      const leadId = generateLeadId(allLeads);
+      const lead = {
+        ...fb,
+        id: `lead_fb_${Date.now()}_${count}`,
+        leadId,
+        stage: 'new',
+        updatedAt: fb.createdAt,
+        createdBy: session.userId,
+        activities: [],
+        files: [],
+      };
+      await fetch('/api/leads', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(lead) });
+      allLeads.unshift(lead);
+      count++;
+    }
+    await loadLeads();
+    toast(`✅ ${count} Facebook leads imported!`);
   }
 
   async function changeStage(lead, stageId) {
@@ -562,6 +610,10 @@ export default function CRM() {
 
         <div className="topbar-actions">
           <button className="topbar-btn" onClick={() => setShowImport(true)}>📥 Import</button>
+          <button className="topbar-btn" onClick={importFbLeads} style={{ color:'#1877F2', borderColor:'rgba(24,119,242,0.3)' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            FB Leads
+          </button>
           <button className="topbar-btn primary" onClick={() => { setEditing(false); setShowNewLead(true); }}>+ New Lead</button>
 
           <div className="user-badge" onClick={logout} title="Click to sign out">
@@ -601,26 +653,41 @@ export default function CRM() {
         {view === 'dashboard' && (
           <div className="dashboard">
             <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-icon">📋</div>
-                <div className="stat-value">{stats.total}</div>
-                <div className="stat-label">Total Leads</div>
+              <div className="stat-card stat-card-blue">
+                <div className="stat-card-icon">📋</div>
+                <div className="stat-card-value">{stats.total}</div>
+                <div className="stat-card-label">Total Leads</div>
+                <div className="stat-card-sub">All time</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-icon">💰</div>
-                <div className="stat-value gold">AED {(stats.totalVal / 1000).toFixed(0)}K</div>
-                <div className="stat-label">Pipeline Value</div>
+              <div className="stat-card stat-card-gold">
+                <div className="stat-card-icon">💰</div>
+                <div className="stat-card-value">AED {stats.totalVal >= 1000 ? (stats.totalVal/1000).toFixed(0)+'K' : stats.totalVal || '—'}</div>
+                <div className="stat-card-label">Pipeline Value</div>
+                <div className="stat-card-sub">Active deals</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-icon">✅</div>
-                <div className="stat-value success">{stats.won}</div>
-                <div className="stat-label">Deals Won</div>
-                <div className="stat-sub">AED {(stats.wonVal / 1000).toFixed(0)}K value</div>
+              <div className="stat-card stat-card-green">
+                <div className="stat-card-icon">✅</div>
+                <div className="stat-card-value">{stats.won}</div>
+                <div className="stat-card-label">Deals Won</div>
+                <div className="stat-card-sub">AED {stats.wonVal >= 1000 ? (stats.wonVal/1000).toFixed(0)+'K' : stats.wonVal || 0} value</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-icon">📈</div>
-                <div className="stat-value teal">{stats.convRate}%</div>
-                <div className="stat-label">Conversion Rate</div>
+              <div className="stat-card stat-card-teal">
+                <div className="stat-card-icon">📈</div>
+                <div className="stat-card-value">{stats.convRate}%</div>
+                <div className="stat-card-label">Conversion Rate</div>
+                <div className="stat-card-sub">Won / Total</div>
+              </div>
+              <div className="stat-card stat-card-purple">
+                <div className="stat-card-icon">🆕</div>
+                <div className="stat-card-value">{stats.byStage['new'] || 0}</div>
+                <div className="stat-card-label">New Inquiries</div>
+                <div className="stat-card-sub">Awaiting contact</div>
+              </div>
+              <div className="stat-card stat-card-orange">
+                <div className="stat-card-icon">📄</div>
+                <div className="stat-card-value">{(stats.byStage['proposal']||0) + (stats.byStage['review']||0)}</div>
+                <div className="stat-card-label">In Progress</div>
+                <div className="stat-card-sub">Proposal + Review</div>
               </div>
             </div>
 
@@ -889,6 +956,7 @@ function LeadCard({ lead, onClick }) {
   const svc = lead.service?.split(' ')[0];
   return (
     <div className={`lead-card${isStale ? ' stale' : ''}`} onClick={onClick}>
+      {lead.leadId && <div className="lead-id-badge">{lead.leadId}</div>}
       <div className="lead-name">{lead.name}</div>
       {lead.company && <div className="lead-company">{lead.company}</div>}
       <div className="lead-meta">
@@ -969,7 +1037,10 @@ function DetailModal({ lead, session, onClose, onSave, onDelete, onStageChange, 
       <div className="modal">
         <div className="modal-header">
           <div>
-            <div className="modal-title">{lead.name}</div>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <div className="modal-title">{lead.name}</div>
+              {lead.leadId && <span className="modal-lead-id">{lead.leadId}</span>}
+            </div>
             {lead.company && <div className="modal-company">{lead.company}</div>}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
