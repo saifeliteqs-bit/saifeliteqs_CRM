@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 const USERS = [
   { id: 'saif',   name: 'Saif',   role: 'CEO',        badge: 'avatar-ceo',       initials: 'SA', access: 'all' },
   { id: 'nouman', name: 'Nouman', role: 'Marketing',  badge: 'avatar-marketing', initials: 'NO', access: 'all' },
-  { id: 'zafar',  name: 'Zafar',  role: 'Operations', badge: 'avatar-ops',       initials: 'ZA', access: 'assigned' },
+  { id: 'zafar',  name: 'Zafar',  role: 'Operations', badge: 'avatar-ops',       initials: 'ZA', access: 'all' },
 ];
 
 // ── FACEBOOK SEED LEADS ──────────────────────────────────────────────────────
