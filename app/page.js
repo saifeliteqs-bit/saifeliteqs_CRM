@@ -156,10 +156,10 @@ export default function CRM() {
 
   useEffect(() => { loadLeads(); }, [loadLeads]);
   
-  // Poll for new notifications every 30 seconds
+  // Poll for new notifications every 60 seconds
   useEffect(() => {
     if (!session) return;
-    const interval = setInterval(loadLeads, 30000);
+    const interval = setInterval(loadLeads, 60000);
     return () => clearInterval(interval);
   }, [session, loadLeads]);
 
