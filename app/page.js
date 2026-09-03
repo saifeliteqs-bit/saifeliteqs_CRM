@@ -1076,7 +1076,7 @@ function DetailModal({ lead, session, onClose, onSave, onDelete, onStageChange, 
           {/* EDIT FORM */}
           {editMode ? (
             <div className="form-grid" style={{ marginBottom: 16 }}>
-              {[['name','Client Name'],['company','Company'],['phone','Phone'],['email','Email'],['location','Location'],['projectRef','Project Ref'],['value','Value (AED)']].map(([k,l]) => (
+              {[['name','Client Name'],['company','Company'],['phone','Phone'],['email','Email'],['location','Location'],['projectRef','Project Ref'],['projectStage','Project Stage'],['communication','Preferred Contact'],['value','Value (AED)']].map(([k,l]) => (
                 <div className="form-group" key={k}>
                   <label className="form-label">{l}</label>
                   <input className="form-input" value={form[k]||''} onChange={e => setForm(f => ({...f,[k]:e.target.value}))} />
@@ -1102,7 +1102,7 @@ function DetailModal({ lead, session, onClose, onSave, onDelete, onStageChange, 
             </div>
           ) : (
             <div className="info-grid">
-              {[['Phone',lead.phone],['Email',lead.email],['Location',lead.location],['Service',lead.service],['Source',lead.source],['Project Ref',lead.projectRef],['Assigned To',lead.assignedTo ? getUserById(lead.assignedTo).name+' ('+getUserById(lead.assignedTo).role+')' : null],['Value','AED '+(lead.value ? Number(lead.value).toLocaleString() : '—')],['Added By',getUserById(lead.createdBy).name],['Date Added',formatDate(lead.createdAt)]].map(([l,v]) => v ? (
+              {[['Phone',lead.phone],['Email',lead.email],['Location',lead.location],['Service',lead.service],['Source',lead.source],['Project Ref',lead.projectRef],['Project Stage',lead.projectStage],['Preferred Contact',lead.communication],['Assigned To',lead.assignedTo ? getUserById(lead.assignedTo).name+' ('+getUserById(lead.assignedTo).role+')' : null],['Value','AED '+(lead.value ? Number(lead.value).toLocaleString() : '—')],['Added By',getUserById(lead.createdBy).name],['Date Added',formatDate(lead.createdAt)]].map(([l,v]) => v ? (
                 <div className="info-item" key={l}>
                   <div className="info-label">{l}</div>
                   <div className={`info-value${l==='Value'?' gold':''}`}>{linkify(v)}</div>
@@ -1212,7 +1212,7 @@ function DetailModal({ lead, session, onClose, onSave, onDelete, onStageChange, 
 function LeadForm({ session, onClose, onSave, initial }) {
   const [form, setForm] = useState({
     name: '', company: '', phone: '', email: '', location: '',
-    service: '', source: '', projectRef: '', value: '', scope: '',
+    service: '', source: '', projectRef: '', projectStage: '', communication: '', value: '', scope: '',
     assignedTo: '', stage: 'new',
     ...initial,
   });
@@ -1226,7 +1226,7 @@ function LeadForm({ session, onClose, onSave, initial }) {
         </div>
         <div className="modal-body">
           <div className="form-grid">
-            {[['name','Client Name *'],['company','Company / Firm'],['phone','Phone Number'],['email','Email'],['location','Project Location'],['projectRef','Project Reference']].map(([k,l]) => (
+            {[['name','Client Name *'],['company','Company / Firm'],['phone','Phone Number'],['email','Email'],['location','Project Location'],['projectRef','Project Reference'],['projectStage','Project Stage'],['communication','Preferred Contact']].map(([k,l]) => (
               <div className="form-group" key={k}>
                 <label className="form-label">{l}</label>
                 <input className="form-input" value={form[k]} onChange={e => setForm(f => ({...f,[k]:e.target.value}))} />
