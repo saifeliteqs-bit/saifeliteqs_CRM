@@ -78,7 +78,7 @@ function getFileIcon(name) {
 }
 
 function getUserById(id) { return USERS.find(u => u.id === id) || { name: id, initials: id?.substring(0,2).toUpperCase(), badge: 'avatar-ops' }; }
-function getStageById(id) { return STAGES.find(s => s.id === id) || STAGES[0]; }
+function getStageById(id) { return STAGES.find(s => s.id === (id||'').toLowerCase().trim()) || STAGES[0]; }
 
 function staleCheck(lead) {
   const last = lead.updatedAt || lead.createdAt;
@@ -748,7 +748,7 @@ export default function CRM() {
             )}
             <div className="pipeline-board">
               {STAGES.map(stage => {
-                const stagLeads = filtered.filter(l => l.stage === stage.id);
+                const stagLeads = filtered.filter(l => (l.stage || '').toLowerCase().trim() === stage.id);
                 return (
                   <div className="pipeline-col" key={stage.id}>
                     <div className="col-header">
