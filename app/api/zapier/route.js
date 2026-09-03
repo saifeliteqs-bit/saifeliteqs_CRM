@@ -45,18 +45,20 @@ export async function POST(req) {
     const now    = new Date().toISOString();
 
     const newLead = {
-      id:         `lead_zapier_${Date.now()}`,
+      id:            `lead_zapier_${Date.now()}`,
       leadId,
       name,
       phone,
       email,
       service,
-      scope:      scopeText,
+      scope,
+      projectStage,
+      communication,
       source,
-      stage:      'new',        // HARDCODED lowercase — never from Zapier
-      createdAt:  now,
-      updatedAt:  now,
-      createdBy:  'zapier',
+      stage:         'new',
+      createdAt:     now,
+      updatedAt:     now,
+      createdBy:     'zapier',
       activities: [{
         id:   `act_zapier_${Date.now()}`,
         type: 'note',
