@@ -1,3 +1,4 @@
+// app/api/leads/route.js
 import { kv } from '@vercel/kv';
 
 const KEY = 'seqs:leads';
@@ -29,10 +30,14 @@ export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
+    if (!id) return Response.json({ ok: false, error: 'No ID provided' }, { status: 400 });
     const leads = await kv.get(KEY) || [];
-    await kv.set(KEY, leads.filter(l => l.id !== id));
-    return Response.json({ ok: true });
+    const filtered = leads.filter(l => l.id !== id);
+    await kv.set(KEY, filtered);
+    console.log(`Deleted lead: ${id}, remaining: ${filtered.length}`);
+    return Response.json({ ok: true, deleted: id });
   } catch (e) {
+    console.error('Delete error:', e);
     return Response.json({ ok: false, error: e.message }, { status: 500 });
   }
 }
